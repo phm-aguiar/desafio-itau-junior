@@ -21,14 +21,14 @@ import com.desafio.itau.petlocation.infrastructure.adapter.in.PetLocationControl
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = PetLocationController.class)
-@Import(GlobalExceptionHandlerTest.TestConfig.class) // Importa a configuração do mock manualmente
+@Import(GlobalExceptionHandlerTest.TestConfig.class)
 public class GlobalExceptionHandlerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private PetLocationService petLocationService; // Agora injetado via @Import
+    private PetLocationService petLocationService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -58,7 +58,6 @@ public class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.path").value("/pet-location/address"));
     }
 
-    // Classe de configuração para fornecer o mock de PetLocationService
     static class TestConfig {
         @Bean
         public PetLocationService petLocationService() {
