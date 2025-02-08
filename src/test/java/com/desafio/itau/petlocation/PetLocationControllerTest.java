@@ -24,7 +24,7 @@ import com.desafio.itau.petlocation.infrastructure.config.GlobalExceptionHandler
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = PetLocationController.class)
-@Import({PetLocationControllerTest.TestConfig.class, GlobalExceptionHandler.class}) // Importa o mock e o manipulador global de exceções
+@Import({PetLocationControllerTest.TestConfig.class, GlobalExceptionHandler.class})
 public class PetLocationControllerTest {
 
     @Autowired
@@ -38,7 +38,7 @@ public class PetLocationControllerTest {
 
     @BeforeEach
     public void setUp() {
-        Mockito.reset(petLocationService); // Reseta os mocks antes de cada teste
+        Mockito.reset(petLocationService);
     }
 
     @Test
@@ -57,7 +57,6 @@ public class PetLocationControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        // Print response for debugging
         String jsonResponse = result.getResponse().getContentAsString();
         System.out.println("Response Content: " + jsonResponse);
 
@@ -88,7 +87,6 @@ public class PetLocationControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        // Print the response content
         String responseContent = result.getResponse().getContentAsString();
         System.out.println("Response Content: " + responseContent);
 
@@ -166,7 +164,6 @@ public class PetLocationControllerTest {
                 .andExpect(jsonPath("$.message").value("Coordenadas inválidas: latitude deve estar entre -90 e 90 e longitude entre -180 e 180."));
     }
 
-    // Classe para injetar o mock manualmente
     static class TestConfig {
 
         @Bean

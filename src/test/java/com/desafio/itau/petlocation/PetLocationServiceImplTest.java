@@ -56,7 +56,6 @@ public class PetLocationServiceImplTest {
         // Assert
         assertNull(actualAddress);
 
-        // Verifica se o método do mock foi chamado corretamente
         verify(geolocationService).getAddress(location.getLatitude(), location.getLongitude());
     }
 
@@ -79,7 +78,6 @@ public class PetLocationServiceImplTest {
         assertEquals(emptyAddress.getNeighbourhood(), actualAddress.getNeighbourhood());
         assertEquals(emptyAddress.getStreet(), actualAddress.getStreet());
 
-        // Verifica se o método do mock foi chamado corretamente
         verify(geolocationService).getAddress(location.getLatitude(), location.getLongitude());
     }
 
@@ -108,7 +106,6 @@ public class PetLocationServiceImplTest {
         assertEquals(expectedAddress.getNeighbourhood(), actualAddress.getNeighbourhood());
         assertEquals(expectedAddress.getStreet(), actualAddress.getStreet());
 
-        // Verifica se o método do mock foi chamado corretamente
         verify(geolocationService).getAddress(location.getLatitude(), location.getLongitude());
     }
 
@@ -137,7 +134,6 @@ public class PetLocationServiceImplTest {
         assertEquals(expectedAddress.getNeighbourhood(), actualAddress.getNeighbourhood());
         assertEquals(expectedAddress.getStreet(), actualAddress.getStreet());
 
-        // Verifica se o método do mock foi chamado corretamente
         verify(geolocationService).getAddress(location.getLatitude(), location.getLongitude());
     }
 
@@ -202,7 +198,6 @@ public class PetLocationServiceImplTest {
         assertEquals(expectedAddress.getNeighbourhood(), actualAddress.getNeighbourhood());
         assertEquals(expectedAddress.getStreet(), actualAddress.getStreet());
 
-        // Verifica se o método do mock foi chamado corretamente
         verify(geolocationService).getAddress(location.getLatitude(), location.getLongitude());
     }
 
