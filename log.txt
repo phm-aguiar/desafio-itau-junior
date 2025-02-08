@@ -1,0 +1,307 @@
+application.properties
+spring.application.name=petlocation
+positionstack.api.key=d1adb09ff77826f82d0be6a73d6256fb
+positionstack.api.url=https://api.positionstack.com/v1/reverse
+package com.desafio.itau.petlocation;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class PetlocationApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(PetlocationApplication.class, args);
+	}
+
+}
+package com.desafio.itau.petlocation.infrastructure.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+package com.desafio.itau.petlocation.infrastructure.adapter.out;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.desafio.itau.petlocation.application.port.out.GeolocationService;
+import com.desafio.itau.petlocation.domain.model.Address;
+
+@Service
+public class PositionStackAdapter implements GeolocationService {
+
+    private final RestTemplate restTemplate;
+
+    @Value("${positionstack.api.url}")
+    private String apiUrl;
+
+    @Value("${positionstack.api.key}")
+    private String apiKey;
+
+    public PositionStackAdapter(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    @Override
+    public Address getAddress(double latitude, double longitude) {
+        String query = latitude + "," + longitude;
+        String url = String.format("%s/reverse?access_key=%s&query=%s", apiUrl, apiKey, query);
+        
+        PositionStackResponse response = restTemplate.getForObject(url, PositionStackResponse.class);
+        
+        if (response != null && response.data != null && response.data.length > 0) {
+            PositionStackResponse.Data result = response.data[0];
+            return new Address(
+                result.country, result.region, result.county, result.locality,
+                result.street, "", result.postal_code, result.label, result.map_url
+            );
+        }
+        return null;
+    }
+
+    private static class PositionStackResponse {
+        public Data[] data;
+
+        private static class Data {
+            public String country;
+            public String region;
+            public String county;
+            public String locality;
+            public String street;
+            public String postal_code;
+            public String label;
+            public String map_url;
+        }
+    }
+}
+
+package com.desafio.itau.petlocation.infrastructure.adapter.in;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.desafio.itau.petlocation.application.port.in.PetLocationService;
+import com.desafio.itau.petlocation.domain.model.Address;
+import com.desafio.itau.petlocation.domain.model.PetLocation;
+
+@RestController
+@RequestMapping("/pet-location")
+public class PetLocationController {
+
+    private final PetLocationService petLocationService;
+
+    public PetLocationController(PetLocationService petLocationService) {
+        this.petLocationService = petLocationService;
+    }
+
+    @PostMapping("/address")
+    public Address getAddress(@RequestBody PetLocation location) {
+        return petLocationService.getAddressFromCoordinates(location);
+    }
+}
+
+package com.desafio.itau.petlocation.domain.model;
+
+import java.time.LocalDateTime;
+
+public class PetLocation {
+	private String sensorId;
+    private double latitude;
+    private double longitude;
+    private LocalDateTime timestamp;
+
+    public PetLocation(String sensorId, double latitude, double longitude, LocalDateTime timestamp) {
+        this.sensorId = sensorId;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.timestamp = timestamp;
+    }
+
+	public String getSensorId() {
+		return sensorId;
+	}
+
+	public void setSensorId(String sensorId) {
+		this.sensorId = sensorId;
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+	public LocalDateTime getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(LocalDateTime timestamp) {
+		this.timestamp = timestamp;
+	}
+
+}
+
+package com.desafio.itau.petlocation.domain.model;
+
+public class Address {
+
+    private String country;
+    private String state;
+    private String city;
+    private String neighbourhood;
+    private String street;
+    private String number;
+    private String postalCode;
+    private String fullAddress;
+    private String mapUrl;
+
+    public Address(String country, String state, String city, String neighbourhood,
+            String street, String number, String postalCode, String fullAddress, String mapUrl) {
+        this.country = country;
+        this.state = state;
+        this.city = city;
+        this.neighbourhood = neighbourhood;
+        this.street = street;
+        this.number = number;
+        this.postalCode = postalCode;
+        this.fullAddress = fullAddress;
+        this.mapUrl = mapUrl;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getNeighbourhood() {
+        return neighbourhood;
+    }
+
+    public void setNeighbourhood(String neighbourhood) {
+        this.neighbourhood = neighbourhood;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getFullAddress() {
+        return fullAddress;
+    }
+
+    public void setFullAddress(String fullAddress) {
+        this.fullAddress = fullAddress;
+    }
+
+    public String getMapUrl() {
+        return mapUrl;
+    }
+
+    public void setMapUrl(String mapUrl) {
+        this.mapUrl = mapUrl;
+    }
+
+}
+
+
+package com.desafio.itau.petlocation.application.service;
+
+import org.springframework.stereotype.Service;
+
+import com.desafio.itau.petlocation.application.port.in.PetLocationService;
+import com.desafio.itau.petlocation.application.port.out.GeolocationService;
+import com.desafio.itau.petlocation.domain.model.Address;
+import com.desafio.itau.petlocation.domain.model.PetLocation;
+
+@Service
+public class PetLocationServiceImpl implements PetLocationService {
+
+    private final GeolocationService geolocationService;
+
+    public PetLocationServiceImpl(GeolocationService geolocationService) {
+        this.geolocationService = geolocationService;
+    }
+
+    @Override
+    public Address getAddressFromCoordinates(PetLocation location) {
+        return geolocationService.getAddress(location.getLatitude(), location.getLongitude());
+    }
+}
+package com.desafio.itau.petlocation.application.port.out;
+
+import com.desafio.itau.petlocation.domain.model.Address;
+
+public interface GeolocationService {
+	Address getAddress(double latitude, double longitude);
+}
+package com.desafio.itau.petlocation.application.port.in;
+
+import com.desafio.itau.petlocation.domain.model.Address;
+import com.desafio.itau.petlocation.domain.model.PetLocation;
+
+public interface PetLocationService {
+	Address getAddressFromCoordinates(PetLocation location);
+}
